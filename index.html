@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RSA Encryption and Decryption Tool using JavaScript and JSEncrypt. Generate RSA keys of various sizes, and encrypt and decrypt text with a responsive interface built with Tailwind CSS.">
+    <meta name="keywords" content="RSA, Encryption, Decryption, JavaScript, JSEncrypt, Cryptography, Tailwind CSS">
     <title>Encryption and Decryption with JSEncrypt</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,23 +27,23 @@
         <!-- Keys -->
         <div class="col-span-1 md:col-span-3 mb-4">
             <label for="privkey" class="block text-gray-700 font-medium mb-2">Private Key:</label>
-            <textarea id="privkey" rows="5" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+            <textarea id="privkey" rows="5" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
         <div class="col-span-1 md:col-span-3 mb-4">
             <label for="pubkey" class="block text-gray-700 font-medium mb-2">Public Key:</label>
-            <textarea id="pubkey" rows="5" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+            <textarea id="pubkey" rows="5" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
         <!-- Text to Encrypt and Encrypted Text -->
         <div class="col-span-1 md:col-span-3 mb-4">
             <label for="input" class="block text-gray-700 font-medium mb-2">Text to Encrypt:</label>
-            <textarea id="input" rows="3" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+            <textarea id="input" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
         <div class="col-span-1 md:col-span-3 mb-4">
             <label for="crypted" class="block text-gray-700 font-medium mb-2">Encrypted Text:</label>
-            <textarea id="crypted" rows="3" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+            <textarea id="crypted" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
         <!-- Button to Generate Keys -->
@@ -49,7 +51,7 @@
             <div class="relative">
                 <button id="generate" class="relative w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 focus:outline-none" disabled>
                     Generate Keys
-                    <div id="loader" class="absolute inset-0 flex items-center justify-center rounded-lg hidden">
+                    <div id="loader" class="absolute inset-0 flex items-center justify-center hidden">
                         <svg class="animate-ping h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"></path>
