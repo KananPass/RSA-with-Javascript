@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption and Decryption with JSEncrypt</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-full sm:max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-6 gap-4">
+        <!-- Key Size Selector and Title -->
+        <div class="col-span-1 md:col-span-6 mb-4">
+            <h2 class="text-2xl font-bold mb-4 text-center">Encryption and Decryption</h2>
+            <label for="key-size" class="block text-gray-700 font-medium mb-2 text-center">Key Size (bits):</label>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="512">512 bits</button>
+                <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="1024">1024 bits</button>
+                <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="2048">2048 bits</button>
+                <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="4096">4096 bits</button>
+            </div>
+        </div>
+
+        <!-- Keys -->
+        <div class="col-span-1 md:col-span-3 mb-4">
+            <label for="privkey" class="block text-gray-700 font-medium mb-2">Private Key:</label>
+            <textarea id="privkey" rows="5" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+        </div>
+
+        <div class="col-span-1 md:col-span-3 mb-4">
+            <label for="pubkey" class="block text-gray-700 font-medium mb-2">Public Key:</label>
+            <textarea id="pubkey" rows="5" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+        </div>
+
+        <!-- Text to Encrypt and Encrypted Text -->
+        <div class="col-span-1 md:col-span-3 mb-4">
+            <label for="input" class="block text-gray-700 font-medium mb-2">Text to Encrypt:</label>
+            <textarea id="input" rows="3" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+        </div>
+
+        <div class="col-span-1 md:col-span-3 mb-4">
+            <label for="crypted" class="block text-gray-700 font-medium mb-2">Encrypted Text:</label>
+            <textarea id="crypted" rows="3" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
+        </div>
+
+        <!-- Button to Generate Keys -->
+        <div class="col-span-1 md:col-span-6 mb-4">
+            <div class="relative">
+                <button id="generate" class="relative w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 focus:outline-none" disabled>
+                    Generate Keys
+                    <div id="loader" class="absolute inset-0 flex items-center justify-center rounded-lg hidden">
+                        <svg class="animate-ping h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"></path>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+            <p id="time-report" class="text-sm text-gray-600 mt-2 text-center"></p>
+        </div>
+
+        <!-- Button to Execute Encryption/Decryption -->
+        <div class="col-span-1 md:col-span-6 mb-4">
+            <button id="execute" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600">Encrypt/Decrypt</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let selectedKeySize = 512; // Default key size
+
+            // Preselect key size and set value
+            document.querySelector(`.key-size-button[data-value="${selectedKeySize}"]`).classList.add('bg-blue-600');
+
+            // Change key size
+            const keySizeButtons = document.querySelectorAll(".key-size-button");
+            keySizeButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    selectedKeySize = parseInt(button.getAttribute('data-value'));
+                    keySizeButtons.forEach(btn => btn.classList.remove('bg-blue-600'));
+                    button.classList.add('bg-blue-600');
+                });
+            });
+
+            // Show loader and disable content
+            function showLoader() {
+                document.getElementById('loader').classList.remove('hidden');
+                document.querySelectorAll('button, textarea').forEach(element => {
+                    element.classList.add('opacity-50', 'pointer-events-none');
+                });
+                document.getElementById('generate').disabled = true;
+            }
+
+            // Hide loader and enable content
+            function hideLoader() {
+                document.getElementById('loader').classList.add('hidden');
+                document.querySelectorAll('button, textarea').forEach(element => {
+                    element.classList.remove('opacity-50', 'pointer-events-none');
+                });
+                document.getElementById('generate').disabled = false;
+            }
+
+            // Execute encryption/decryption
+            document.getElementById('execute').addEventListener('click', function () {
+                const crypt = new JSEncrypt();
+                crypt.setPrivateKey(document.getElementById('privkey').value);
+
+                const pubkey = document.getElementById('pubkey').value;
+                if (!pubkey) {
+                    document.getElementById('pubkey').value = crypt.getPublicKey();
+                }
+
+                const input = document.getElementById('input').value;
+                const crypted = document.getElementById('crypted').value;
+
+                if (input) {
+                    document.getElementById('crypted').value = crypt.encrypt(input);
+                    document.getElementById('input').value = '';
+                } else if (crypted) {
+                    const decrypted = crypt.decrypt(crypted);
+                    document.getElementById('input').value = decrypted || 'Error decrypting. Check keys.';
+                    document.getElementById('crypted').value = '';
+                }
+            });
+
+            // Generate keys
+            function generateKeys() {
+                showLoader();
+                const crypt = new JSEncrypt({ default_key_size: selectedKeySize });
+                const startTime = performance.now();
+
+                crypt.getKey(() => {
+                    const endTime = performance.now();
+                    const time = Math.round(endTime - startTime);
+                    document.getElementById('time-report').textContent = `Generated in ${time} ms`;
+                    document.getElementById('privkey').value = crypt.getPrivateKey();
+                    document.getElementById('pubkey').value = crypt.getPublicKey();
+                    hideLoader();
+                });
+            }
+
+            // Generate new keys on click
+            document.getElementById('generate').addEventListener('click', function() {
+                generateKeys();
+                // Disable button while generating keys
+                document.getElementById('generate').disabled = true;
+            });
+
+            // Generate keys on page load
+            generateKeys();
+        });
+    </script>
+
+</body>
+</html>
