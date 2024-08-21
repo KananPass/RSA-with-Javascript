@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="RSA Encryption and Decryption Tool using JavaScript and JSEncrypt. Generate RSA keys of various sizes, and encrypt and decrypt text with a responsive interface built with Tailwind CSS.">
-    <meta name="keywords" content="RSA, Encryption, Decryption, JavaScript, JSEncrypt, Cryptography, Tailwind CSS">
-    <title>Encryption and Decryption with JSEncrypt</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <meta name="description" content="RSA Encryption and Decryption Tool using JavaScript. Generate RSA keys of various sizes, and encrypt and decrypt text with a responsive interface built with Tailwind CSS.">
+    <meta name="keywords" content="RSA, Encryption, Decryption, JavaScript, Cryptography, Tailwind CSS">
+    <title>Encryption and Decryption with RSA</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-200 flex items-center justify-center min-h-screen p-4">
@@ -16,12 +15,27 @@
         <div class="col-span-1 md:col-span-6 mb-4">
             <h2 class="text-2xl font-bold mb-4 text-center">Encryption and Decryption</h2>
             <label for="key-size" class="block text-gray-700 font-medium mb-2 text-center">Key Size (bits):</label>
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="512">512 bits</button>
+            <div class="flex flex-row justify-center gap-4">
                 <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="1024">1024 bits</button>
                 <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="2048">2048 bits</button>
                 <button class="key-size-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" data-value="4096">4096 bits</button>
             </div>
+        </div>
+
+        <!-- Button to Generate Keys -->
+        <div class="col-span-1 md:col-span-6 mb-4">
+            <div class="relative">
+                <button id="generate" class="relative w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 focus:outline-none" disabled>
+                    Generate Keys
+                    <div id="loader" class="absolute inset-0 flex items-center justify-center hidden">
+                        <svg class="animate-ping h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"></path>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+            <p id="time-report" class="text-sm text-gray-600 mt-2 text-center"></p>
         </div>
 
         <!-- Keys -->
@@ -46,20 +60,10 @@
             <textarea id="crypted" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
-        <!-- Button to Generate Keys -->
-        <div class="col-span-1 md:col-span-6 mb-4">
-            <div class="relative">
-                <button id="generate" class="relative w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 focus:outline-none" disabled>
-                    Generate Keys
-                    <div id="loader" class="absolute inset-0 flex items-center justify-center hidden">
-                        <svg class="animate-ping h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"></path>
-                        </svg>
-                    </div>
-                </button>
-            </div>
-            <p id="time-report" class="text-sm text-gray-600 mt-2 text-center"></p>
+        <!-- Button to Export Keys -->
+        <div class="col-span-1 md:col-span-6 mb-4 flex gap-4">
+            <button id="export-privkey" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Export Private Key</button>
+            <button id="export-pubkey" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Export Public Key</button>
         </div>
 
         <!-- Button to Execute Encryption/Decryption -->
@@ -70,89 +74,189 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let selectedKeySize = 512; // Default key size
 
-            // Preselect key size and set value
-            document.querySelector(`.key-size-button[data-value="${selectedKeySize}"]`).classList.add('bg-blue-600');
+        let selectedKeySize = 1024; // Default key size
 
-            // Change key size
-            const keySizeButtons = document.querySelectorAll(".key-size-button");
-            keySizeButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    selectedKeySize = parseInt(button.getAttribute('data-value'));
-                    keySizeButtons.forEach(btn => btn.classList.remove('bg-blue-600'));
-                    button.classList.add('bg-blue-600');
-                });
+        // Preselect key size and set value
+        document.querySelector(`.key-size-button[data-value="${selectedKeySize}"]`).classList.add('bg-blue-600');
+
+        // Change key size
+        const keySizeButtons = document.querySelectorAll(".key-size-button");
+        keySizeButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                selectedKeySize = parseInt(button.getAttribute('data-value'));
+                keySizeButtons.forEach(btn => btn.classList.remove('bg-blue-600'));
+                button.classList.add('bg-blue-600');
             });
+        });
 
-            // Show loader and disable content
-            function showLoader() {
-                document.getElementById('loader').classList.remove('hidden');
-                document.querySelectorAll('button, textarea').forEach(element => {
-                    element.classList.add('opacity-50', 'pointer-events-none');
-                });
-                document.getElementById('generate').disabled = true;
+        // Convert ArrayBuffer to Base64
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
             }
+            return window.btoa(binary);
+        }
 
-            // Hide loader and enable content
-            function hideLoader() {
-                document.getElementById('loader').classList.add('hidden');
-                document.querySelectorAll('button, textarea').forEach(element => {
-                    element.classList.remove('opacity-50', 'pointer-events-none');
-                });
-                document.getElementById('generate').disabled = false;
+        function removePEMHeaders(pem) {
+            // Remove the first and last lines of the PEM
+            return pem
+                .replace(/-----BEGIN (.*)-----/, '')  // Remove the beginning
+                .replace(/-----END (.*)-----/, '')    // Remove the end
+                .replace(/\s+/g, '');                 // Remove newlines
+        }
+
+        // Convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            base64 = removePEMHeaders(base64);
+            const binary_string = window.atob(base64);
+            const len = binary_string.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary_string.charCodeAt(i);
             }
+            return bytes.buffer;
+        }
 
-            // Execute encryption/decryption
-            document.getElementById('execute').addEventListener('click', function () {
-                const crypt = new JSEncrypt();
-                crypt.setPrivateKey(document.getElementById('privkey').value);
+        // Show loader and disable content
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+            document.querySelectorAll('button, textarea').forEach(element => {
+                element.classList.add('opacity-50', 'pointer-events-none');
+            });
+            document.getElementById('generate').disabled = true;
+        }
 
-                const pubkey = document.getElementById('pubkey').value;
-                if (!pubkey) {
-                    document.getElementById('pubkey').value = crypt.getPublicKey();
-                }
+        // Hide loader and enable content
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+            document.querySelectorAll('button, textarea').forEach(element => {
+                element.classList.remove('opacity-50', 'pointer-events-none');
+            });
+            document.getElementById('generate').disabled = false;
+        }
 
-                const input = document.getElementById('input').value;
-                const crypted = document.getElementById('crypted').value;
+        // Generate keys
+        async function generateKeys() {
+            showLoader();
+            const keyPair = await crypto.subtle.generateKey(
+                {
+                    name: "RSA-OAEP",
+                    modulusLength: selectedKeySize,
+                    publicExponent: new Uint8Array([1, 0, 1]), // 65537
+                    hash: "SHA-256"
+                },
+                true,
+                ["encrypt", "decrypt"]
+            );
 
-                if (input) {
-                    document.getElementById('crypted').value = crypt.encrypt(input);
-                    document.getElementById('input').value = '';
-                } else if (crypted) {
-                    const decrypted = crypt.decrypt(crypted);
-                    document.getElementById('input').value = decrypted || 'Error decrypting. Check keys.';
+            const privateKey = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+            const publicKey = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+
+            document.getElementById('privkey').value = `-----BEGIN PRIVATE KEY-----\n${arrayBufferToBase64(privateKey).match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----`;
+            document.getElementById('pubkey').value = `-----BEGIN PUBLIC KEY-----\n${arrayBufferToBase64(publicKey).match(/.{1,64}/g).join('\n')}\n-----END PUBLIC KEY-----`;
+
+            hideLoader();
+        }
+
+        // Execute encryption/decryption
+        async function executeEncryptionDecryption() {
+            const privKeyBase64 = document.getElementById('privkey').value;
+            const pubKeyBase64 = document.getElementById('pubkey').value;
+
+            const privKey = await crypto.subtle.importKey(
+                "pkcs8",
+                base64ToArrayBuffer(privKeyBase64),
+                {
+                    name: "RSA-OAEP",
+                    hash: "SHA-256"
+                },
+                true,
+                ["decrypt"]
+            );
+
+            const pubKey = await crypto.subtle.importKey(
+                "spki",
+                base64ToArrayBuffer(pubKeyBase64),
+                {
+                    name: "RSA-OAEP",
+                    hash: "SHA-256"
+                },
+                true,
+                ["encrypt"]
+            );
+
+            const input = document.getElementById('input').value;
+            const crypted = document.getElementById('crypted').value;
+
+            if (input) {
+                const encryptedBuffer = await crypto.subtle.encrypt(
+                    {
+                        name: "RSA-OAEP"
+                    },
+                    pubKey,
+                    new TextEncoder().encode(input)
+                );
+                document.getElementById('crypted').value = arrayBufferToBase64(encryptedBuffer);
+                document.getElementById('input').value = '';
+            } else if (crypted) {
+                const encryptedBuffer = base64ToArrayBuffer(crypted);
+                try {
+                    const decryptedBuffer = await crypto.subtle.decrypt(
+                        {
+                            name: "RSA-OAEP"
+                        },
+                        privKey,
+                        encryptedBuffer
+                    );
+                    document.getElementById('input').value = new TextDecoder().decode(decryptedBuffer);
+                    document.getElementById('crypted').value = '';
+                } catch (e) {
+                    document.getElementById('input').value = 'Error decrypting. Check keys.';
                     document.getElementById('crypted').value = '';
                 }
-            });
-
-            // Generate keys
-            function generateKeys() {
-                showLoader();
-                const crypt = new JSEncrypt({ default_key_size: selectedKeySize });
-                const startTime = performance.now();
-
-                crypt.getKey(() => {
-                    const endTime = performance.now();
-                    const time = Math.round(endTime - startTime);
-                    document.getElementById('time-report').textContent = `Generated in ${time} ms`;
-                    document.getElementById('privkey').value = crypt.getPrivateKey();
-                    document.getElementById('pubkey').value = crypt.getPublicKey();
-                    hideLoader();
-                });
             }
+        }
 
-            // Generate new keys on click
-            document.getElementById('generate').addEventListener('click', function() {
-                generateKeys();
-                // Disable button while generating keys
-                document.getElementById('generate').disabled = true;
-            });
+        // Export key function
+        function exportKey(key, type) {
+            const blob = new Blob([key], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_key.pem`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
-            // Generate keys on page load
-            generateKeys();
+        // Export private key
+        document.getElementById('export-privkey').addEventListener('click', function() {
+            const privKey = document.getElementById('privkey').value;
+            if (privKey) {
+                exportKey(privKey, 'private');
+            } else {
+                alert('No private key to export.');
+            }
         });
-    </script>
 
-</body>
-</html>
+        // Export public key
+        document.getElementById('export-pubkey').addEventListener('click', function() {
+            const pubKey = document.getElementById('pubkey').value;
+            if (pubKey) {
+                exportKey(pubKey, 'public');
+            } else {
+                alert('No public key to export.');
+            }
+        });
+
+        // Event listeners
+        document.getElementById('generate').addEventListener('click', generateKeys);
+        document.getElementById('execute').addEventListener('click', executeEncryptionDecryption);
+
+        // Generate keys on page load
+        generateKeys();
+    });
+</script>

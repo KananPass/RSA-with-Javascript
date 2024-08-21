@@ -1,10 +1,10 @@
 # RSA Encryption and Decryption Tool
 
-A tool for RSA encryption and decryption built with JavaScript using JSEncrypt. This application allows users to generate RSA keys of various sizes (512, 1024, 2048, 4096 bits), and perform encryption and decryption operations with a clean, responsive interface using Tailwind CSS.
+A tool for RSA encryption and decryption built with JavaScript using JSEncrypt. This application allows users to generate RSA keys of various sizes (1024, 2048, 4096 bits), and perform encryption and decryption operations with a clean, responsive interface using Tailwind CSS.
 
 ## Features
 
-- **Key Size Selection**: Generate RSA keys of different sizes (512, 1024, 2048, 4096 bits).
+- **Key Size Selection**: Generate RSA keys of different sizes (1024, 2048, 4096 bits).
 - **Encryption/Decryption**: Encrypt and decrypt text using RSA keys.
 - **Responsive Design**: Clean, responsive interface that adapts to both large screens and mobile devices.
 - **Loader Integration**: Visual feedback with a loader while generating keys.
@@ -31,7 +31,7 @@ To run this application, you need a modern web browser. No server-side setup is 
 
 ### Usage
 
-1. **Select Key Size**: Click on the buttons to select the desired RSA key size (512, 1024, 2048, 4096 bits).
+1. **Select Key Size**: Click on the buttons to select the desired RSA key size (1024, 2048, 4096 bits).
 
 2. **Generate Keys**: Click the "Generate Keys" button to generate RSA keys. While the keys are being generated, a loader will be displayed and other inputs will be disabled.
 
